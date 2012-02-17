@@ -10,8 +10,8 @@
   the entire region of interest.
 }
 \usage{
-  maxlike(formula, rasters, points, starts,
-          hessian = TRUE, na.action = "na.omit", ...)
+  maxlike(formula, rasters, points, starts, hessian = TRUE,
+          fixed, removeDuplicates=FALSE, na.action = "na.omit", ...)
 }
 \arguments{
   \item{formula}{
@@ -38,6 +38,18 @@
     Logical. Should the hessian be computed and the variance-covariance matrix
     returned?
     }
+  \item{fixed}{
+    Optional vector for fixing parameters. It must be
+    of length equal to the number of parameters in the
+    model. If an element of fixed is NA, then the parameter is
+    estimated, otherwise if it is a real number, the parameter is fixed
+    at this value.
+    }
+  \item{removeDuplicates}{
+    Logical. Should duplicate points be removed. Defaults to FALSE, but
+    note that the MAXENT default is TRUE. It is unclear why duplicate
+    points should be removed, but this option is provided for
+    comparative purposes.}
   \item{na.action}{
     See \code{\link{options}} for choices
   }
@@ -46,32 +58,39 @@
     }
 }
 \details{
-  Data from the entire region of interest are contained in rasters.
+  Covariate data for the entire region of interest are contained in \code{rasters}.
   Data from the presence locations are extracted using the
   coordinates in \code{points}. Rasters and points
   should both use the same coordinate system. The program does not check
   this so it is up to the user.
   }
 \value{
-  A list with 3 components
+  A list with 8 components
   \item{Est}{data.frame containing the parameter estimates (Ests) and
     standard errors (SE).}
   \item{vcov}{variance-covariance matrix}
   \item{AIC}{AIC}
   \item{call}{the original call}
   \item{pts.removed}{The points removed due to missing values}
-  \item{pix.removed}{The pixesls removed due to missing values}
+  \item{pix.removed}{The pixels removed due to missing values}
+  \item{optim}{The object returned by \code{\link{optim}}}
+  \item{not.fixed}{A logical vector indicating if a parameter was
+    estimated or fixed.}
   }
 \note{
   In general it is very hard to obtain a random sample of presence
-  points, which is a requirement of both the Royle et al. (In press)
+  points, which is a requirement of both the Royle et al. (2012)
   method and of MAXENT. This is one of many reasons why presence-absence
   data are preferable. When presence-absence data are available, they
   can be modeled using functions such as
   \code{\link[stats]{glm}}. Creating
-  maps of prediction from \code{\link[stats]{glm}} can be accomplished
-  in the
-  same way as is shown in the example below.
+  maps of prediction from \code{\link[stats]{glm}} is easily
+  accomplished.
+
+  The MAXENT software assumes that species prevalence is known a
+  priori. If the user does not specify a value for prevalence,
+  prevalence is set to 0.5. MAXENT predictions are highly sensitive to
+  this setting. In contrast, \code{maxlike} directly estimates prevalence.
 
   Another weakness of models for presence-only data is that they do not
   allow one to model detection probability, which is typically less than
@@ -81,55 +100,88 @@
   (Fiske and Chandler 2011) offers numerous
   methods for jointly modeling both occurrence and detection probability
   when detection/non-detection data are available.
+}
+
+\section{Warning}{
+  Maximizing the log-likelihood function is achieved using the
+  \code{\link{optim}} function, which can fail to find the global optima
+  if sensible starting values are not
+  supplied. The default starting values are \code{rep(0, npars)}, which will
+  often be adequate if the covariates have been
+  standardized. Standardizing covariates is thus recommended.
+  Even when covariates are standardized, it is always a good idea to try
+  various starting values to see if the
+  log-likelihood can be increased. When fitting models with many
+  parameters, good starting values can be found by fitting simpler
+  models first.
   }
+
 \references{
   Royle, J.A., R.B. Chandler, C. Yackulic and J.
-  D. Nichols. In Press. Likelihood analysis of species occurrence probability
+  D. Nichols. 2012. Likelihood analysis of species occurrence probability
   from presence-only data for modelling species distributions. Methods
-  in Ecology and Evolution.
+  in Ecology and Evolution. doi: 10.1111/j.2041-210X.2011.00182.x
 
   Fiske, I. and R.B. Chandler. 2011. unmarked: An R Package for Fitting
   Hierarchical Models of Wildlife Occurrence and Abundance. Journal of
   Statistical Software 43(10).
 }
 
-\seealso{ \code{\link{maxlike-package}}, \code{\link{raster}} }
+\seealso{ \code{\link{maxlike-package}}, \code{\link{raster}},
+          \code{\link{carw}} }
 
 \examples{
 
-# Fake data based on R's volcano dataset
-# See help(raster) for other ways of importing raster data
+# Carolina Wren data used in Royle et. al (2012)
+data(carw)
 
-data(MaungaWhau)
-elev <- raster(MaungaWhau$elev, 0, 61, 0, 87)
-precip <- raster(MaungaWhau$precip, 0, 61, 0, 87)
-xy <- MaungaWhau$xy
+# Covert data.frame to a list of rasters
+rl <- lapply(carw.data$raster.data, function(x) {
+   m <- matrix(x, nrow=carw.data$dim[1], ncol=carw.data$dim[2], byrow=TRUE)
+   r <- raster(m)
+   extent(r) <- carw.data$ext
+   r
+})
 
-# Elevation, standardized
-plot(elev)
-points(xy)
+# Create a raster stack and add layer names
+rs <- stack(rl[[1]], rl[[2]], rl[[3]], rl[[4]], rl[[5]], rl[[6]])
+layerNames(rs) <- names(carw.data$raster.data)
 
-# Precipitation, standardized
-plot(precip)
-points(xy)
+plot(rs)
 
-# Stack them and make sure they are named
-ep <- stack(elev, precip)
-layerNames(ep) <- c("elev", "precip")
 
 # Fit a model
-fm <- maxlike(~elev + I(elev^2) + precip, ep, xy)
+fm <- maxlike(~pcMix + I(pcMix^2) + pcDec + I(pcDec^2)+ pcCon +
+    I(pcCon^2) + pcGr + I(pcGr^2) +
+    Lat + I(Lat^2) + Lon + I(Lon^2), rs, carw.data$xy1,
+    method="BFGS", removeDuplicates=TRUE)
+
 summary(fm)
+confint(fm)
+AIC(fm)
+logLik(fm)
 
 
-# Produce species distribution map (i.e., expected probability of occurrence)
-beta <- coef(fm)
-E.logitpsi <- beta[1] + beta[2]*elev + beta[3]*(elev^2) + beta[4]*precip
-E.psi <- exp(E.logitpsi)/(1+exp(E.logitpsi))
-plot(E.psi)
-points(xy)
+
+# Produce species distribution map (ie, expected probability of occurrence)
+psi.hat <- predict(fm, rs)
+plot(psi.hat)
+points(carw.data$xy1, pch=16, cex=0.1)
 
 
+
+# MAXENT sets "default prevalence" to an arbitrary value, 0.5
+# We could do the same by fixing the intercept at logit(0.5)=0
+# However, it seems more appropriate to estimate this parameter
+
+fm.fix <- update(fm, fixed=c(0, rep(NA,length(coef(fm))-1)))
+
+
+
+
+
+
+\dontrun{
 
 # Simulation example
 
@@ -139,8 +191,7 @@ x1 <- raster(outer(x1, x1), xmn=0, xmx=100, ymn=0, ymx=100)
 
 x2 <- raster(matrix(runif(1e4), 100, 100), 0, 100, 0, 100)
 
-# The raster package doesn't handle factors, so you need to
-# code them as dummy variables.
+# Code factors as dummy variables.
 # Note, using asFactor(x3) will not help
 x3 <- raster(matrix(c(0,1), 100, 100), 0, 100, 0, 100)
 
@@ -172,6 +223,7 @@ confint(fm2)
 AIC(fm2)
 logLik(fm2)
 
+}
 
 }
 
