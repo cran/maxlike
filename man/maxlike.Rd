@@ -1,17 +1,19 @@
 \name{maxlike}
 \alias{maxlike}
 \title{
-  Model probability of occurrence using presence-only data
+  Model occurrence probability using presence-only data
 }
 \description{
-  Model the probability of occurrence from presence-only data
-  (i.e., datasets lacking observed absences) using covariate data
-  from a random sample of presence points, and covariate data from
-  the entire region of interest.
+  This function estimates the probability of occurrence using
+  presence-only data and spatially-referenced covariates. Species
+  distribution maps can be created by plotting the
+  expected values of occurrence probability.  The model is described by
+  Royle et al. (2012).
 }
 \usage{
-  maxlike(formula, rasters, points, starts, hessian = TRUE,
-          fixed, removeDuplicates=FALSE, na.action = "na.omit", ...)
+  maxlike(formula, rasters, points, link=c("logit", "cloglog"),
+          starts, hessian = TRUE, fixed, removeDuplicates=FALSE,
+          savedata=FALSE, na.action = "na.omit", ...)
 }
 \arguments{
   \item{formula}{
@@ -19,15 +21,19 @@
     At least 1 continuous covariate must be present in the formula.
     }
   \item{rasters}{
-    A `raster stack' created by the \code{\link{stack}} function
+    The spatially-referenced covariate data formatted as a `raster
+    stack' created by the \code{\link{stack}} function
     in the \code{\link{raster-package}}. It's a good idea to standardize
     these by subtracting the mean and dividing by the standard
     deviation. This will make it easier for \code{\link{optim}} to find
     the maximum-likelihood estimates.
     }
   \item{points}{
-    A \code{\link{data.frame}} with the X and Y coordinates of the
-    presence locations.
+    A \code{\link{matrix}} or \code{\link{data.frame}} with the X and Y
+    coordinates of the presence locations.
+  }
+  \item{link}{
+    The link function. Either "logit" (the default) or "cloglog".
     }
   \item{starts}{
     Starting values for the parameters. This should be a vector with as
@@ -35,21 +41,27 @@
     values are 0, which should be adequate if covariates are standardized.
     }
   \item{hessian}{
-    Logical. Should the hessian be computed and the variance-covariance matrix
-    returned?
+    Logical. Should the hessian be computed and the variance-covariance
+    matrix returned?
     }
   \item{fixed}{
     Optional vector for fixing parameters. It must be
     of length equal to the number of parameters in the
-    model. If an element of fixed is NA, then the parameter is
+    model. If an element of \code{fixed} is NA, then the parameter is
     estimated, otherwise if it is a real number, the parameter is fixed
     at this value.
     }
   \item{removeDuplicates}{
-    Logical. Should duplicate points be removed. Defaults to FALSE, but
-    note that the MAXENT default is TRUE. It is unclear why duplicate
-    points should be removed, but this option is provided for
-    comparative purposes.}
+    Logical. Should duplicate points be removed? Defaults to FALSE, but
+    note that the MAXENT default is TRUE.
+  }
+  \item{savedata}{
+    Should the raster data be saved with the fitted model? Defaults to
+    FALSE in order to reduce the size of the returned object. If you
+    wish to make predictions, it is safer to set this to TRUE, otherwise
+    the raster data are searched for in the working directory, and thus
+    may not be the data used to fit the model.
+  }
   \item{na.action}{
     See \code{\link{options}} for choices
   }
@@ -58,10 +70,8 @@
     }
 }
 \details{
-  Covariate data for the entire region of interest are contained in \code{rasters}.
-  Data from the presence locations are extracted using the
-  coordinates in \code{points}. Rasters and points
-  should both use the same coordinate system. The program does not check
+  \code{points} and \code{rasters}
+  should the same coordinate system. The program does not check
   this so it is up to the user.
   }
 \value{
@@ -76,21 +86,23 @@
   \item{optim}{The object returned by \code{\link{optim}}}
   \item{not.fixed}{A logical vector indicating if a parameter was
     estimated or fixed.}
+  \item{link}{The link function}
   }
 \note{
   In general it is very hard to obtain a random sample of presence
   points, which is a requirement of both the Royle et al. (2012)
   method and of MAXENT. This is one of many reasons why presence-absence
-  data are preferable. When presence-absence data are available, they
-  can be modeled using functions such as
-  \code{\link[stats]{glm}}. Creating
-  maps of prediction from \code{\link[stats]{glm}} is easily
-  accomplished.
+  data are preferable to presence-only data. When presence-absence data
+  are available, they can be modeled using functions such as
+  \code{\link[stats]{glm}}. Creating species distribution maps
+  from \code{\link[stats]{glm}} is easily accomplished using the
+  \code{\link[stats]{predict}} method.
 
   The MAXENT software assumes that species prevalence is known a
   priori. If the user does not specify a value for prevalence,
-  prevalence is set to 0.5. MAXENT predictions are highly sensitive to
-  this setting. In contrast, \code{maxlike} directly estimates prevalence.
+  prevalence is set to 0.5. MAXENT predictions of occurrence probability
+  are highly sensitive to this setting. In contrast, \code{maxlike}
+  directly estimates prevalence.
 
   Another weakness of models for presence-only data is that they do not
   allow one to model detection probability, which is typically less than
@@ -102,12 +114,12 @@
   when detection/non-detection data are available.
 }
 
-\section{Warning}{
+\section{Warnings}{
   Maximizing the log-likelihood function is achieved using the
   \code{\link{optim}} function, which can fail to find the global optima
   if sensible starting values are not
-  supplied. The default starting values are \code{rep(0, npars)}, which will
-  often be adequate if the covariates have been
+  supplied. The default starting values are \code{rep(0, npars)}, which
+  will often be adequate if the covariates have been
   standardized. Standardizing covariates is thus recommended.
   Even when covariates are standardized, it is always a good idea to try
   various starting values to see if the
@@ -154,7 +166,7 @@ plot(rs)
 fm <- maxlike(~pcMix + I(pcMix^2) + pcDec + I(pcDec^2)+ pcCon +
     I(pcCon^2) + pcGr + I(pcGr^2) +
     Lat + I(Lat^2) + Lon + I(Lon^2), rs, carw.data$xy1,
-    method="BFGS", removeDuplicates=TRUE)
+    method="BFGS", removeDuplicates=TRUE, savedata=TRUE)
 
 summary(fm)
 confint(fm)
@@ -162,17 +174,16 @@ AIC(fm)
 logLik(fm)
 
 
-
 # Produce species distribution map (ie, expected probability of occurrence)
-psi.hat <- predict(fm, rs)
+psi.hat <- predict(fm) # Will warn if savedata=FALSE
 plot(psi.hat)
 points(carw.data$xy1, pch=16, cex=0.1)
 
 
 
-# MAXENT sets "default prevalence" to an arbitrary value, 0.5
-# We could do the same by fixing the intercept at logit(0.5)=0
-# However, it seems more appropriate to estimate this parameter
+# MAXENT sets "default prevalence" to an arbitrary value, 0.5.
+# We could do something similar by fixing the intercept at logit(0.5)=0.
+# However, it seems more appropriate to estimate this parameter.
 
 fm.fix <- update(fm, fixed=c(0, rep(NA,length(coef(fm))-1)))
 
@@ -200,7 +211,7 @@ psi <- exp(logit.psi)/(1+exp(logit.psi))
 plot(psi)
 
 r <- stack(x1, x2, x3)
-r@layernames <- c("x1", "x2", "x3")
+names(r) <- c("x1", "x2", "x3")
 plot(r)
 
 pa <- matrix(NA, 100, 100)
