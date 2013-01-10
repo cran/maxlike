@@ -1,8 +1,8 @@
-c32042c50cd419ded58be0149e3add39 *DESCRIPTION
+60832fc0023aa1bd4b538caf664f7d08 *DESCRIPTION
 a61d5c3e4823a4d89ac314ecabf9ff53 *NAMESPACE
-b6ad61df7ccee7a5bae8b6a70109f97b *NEWS
+77741b370923ae52a822657fdd3841d6 *NEWS
 1bc2634396cb25892a2018718de6d53d *R/fmMethods.R
-789e32886f5af4bd41beaa65dc1bb188 *R/maxlike.R
+df1a2d2872f368ac483b36b582623ad0 *R/maxlike.R
 addb5f2a4e4e2b8c3fe1bb7d4e959270 *data/MaungaWhau.rda
 a63f9568052caf57e251cfc96ccd6f83 *data/carw.rda
 c661727e09d692c7c6332bf4c7bab5d6 *inst/CITATION
@@ -11,5 +11,5 @@ c391e9d65bbac21c743d5a9dff071e22 *inst/test/runit.maxlike.R
 b27ae31c277d5ce8974da6b1315888a1 *inst/test/sim.maxlike.R
 e2627973fbc7c1ec60170c6602ae23c3 *man/MaungaWhau.Rd
 010a30364a0ee359d854247ae4e4d419 *man/carw.Rd
-4a920317cd9e00ee37c36c614878e3ae *man/maxlike-package.Rd
+65de348d4ca0c9b845f7f484c22694e9 *man/maxlike-package.Rd
 1b66139d13ace1af5d381d734505512f *man/maxlike.Rd
