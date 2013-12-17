@@ -1,4 +1,4 @@
-855ee872f5d928700a610198aaf67701 *DESCRIPTION
+1bb6d0bcebf5411429bb7314bec37c54 *DESCRIPTION
 a61d5c3e4823a4d89ac314ecabf9ff53 *NAMESPACE
 8b677ac1bb554f19d7c51068db80bd5a *NEWS
 9c244bc04d1193d0f55e86362a45fd14 *R/fmMethods.R
@@ -11,5 +11,5 @@ c391e9d65bbac21c743d5a9dff071e22 *inst/test/runit.maxlike.R
 b27ae31c277d5ce8974da6b1315888a1 *inst/test/sim.maxlike.R
 e2627973fbc7c1ec60170c6602ae23c3 *man/MaungaWhau.Rd
 be2439e0e736aab1fcc2d7eea70a9305 *man/carw.Rd
-65de348d4ca0c9b845f7f484c22694e9 *man/maxlike-package.Rd
+02d7fdffa32f7b89a21539c2f4cfe860 *man/maxlike-package.Rd
 0b75392cc0c9cfe4683e5505080cc38f *man/maxlike.Rd
