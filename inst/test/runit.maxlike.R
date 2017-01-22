@@ -11,7 +11,7 @@ test.maxlike.fit1 <- function() {
 
     # Fit a model
     fm <- maxlike(~elev + I(elev^2) + precip, ep, xy)
-
+    
     # Check estimates
     checkEqualsNumeric(coef(fm),
                        c(0.5366934, 2.4465578, -2.3575862, 2.1310296),
@@ -24,6 +24,35 @@ test.maxlike.fit1 <- function() {
                        -0.03589617, -0.03373490, 0.03618861, -0.03398646,
                        0.03561091,  0.03307982, -0.03398646,  0.04569138),
                        4, 4, byrow=TRUE), tol=1e-6)
+
+    # Check calibration with data.frames (Roeland Kindt)
+
+    # dismo required for randomPoints
+    if(require("dismo", quietly = TRUE)) {
+
+        presenceData <- as.data.frame(extract(ep, xy))
+        background <- randomPoints(ep, n=ncell(ep), extf=1.00)
+        backgroundData <- as.data.frame(extract(ep, y=background))
+        #  backgroundData <- backgroundData[complete.cases(backgroundData), ]
+
+        # Fit a model
+        fm.data <- maxlike(~elev + I(elev^2) + precip, rasters=NULL, points=NULL, 
+            x=presenceData, z=backgroundData)
+    
+        # Check estimates
+        checkEqualsNumeric(coef(fm.data),
+                       c(0.5366934, 2.4465578, -2.3575862, 2.1310296),
+                       tol=1e-6)
+
+        # Check variance-covariance matrix
+        checkEqualsNumeric(vcov(fm.data), matrix(c(
+                       0.05204765,  0.03300724, -0.03589617,  0.03561091,
+                       0.03300724,  0.03921600, -0.03373490,  0.03307982,
+                       -0.03589617, -0.03373490, 0.03618861, -0.03398646,
+                       0.03561091,  0.03307982, -0.03398646,  0.04569138),
+                       4, 4, byrow=TRUE), tol=1e-6)
+    }
+
 
     # Add missing values and refit
     elev2 <- elev
@@ -44,7 +73,7 @@ test.maxlike.fit1 <- function() {
                                 -2.73433869, -1.987336,
                                 1.71726661,  2.558565),
                        4, 2, byrow=TRUE), tol=1e-6)
-
+    
     # Test update
     fm2u <- update(fm2)
     checkEquals(fm2, fm2u)
@@ -73,7 +102,12 @@ test.maxlike.fit1 <- function() {
 
     psi.hat <- predict(fm4)
     checkEqualsNumeric(cellStats(psi.hat, "mean"), 0.3817011, tol=1e-6)
-
+    
+    # Fit a "dynamic" formula
+    formula <- as.formula("~elev + I(elev^2) + precip")
+    fm6 <- maxlike(formula, rasters = ep, points = xy, savedata = T)
+    psi.hat <- predict(fm6)
+    checkEqualsNumeric(cellStats(psi.hat, "mean"), 0.3527259, tol=1e-6)
 }
 
 
