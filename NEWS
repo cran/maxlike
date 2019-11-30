@@ -1,3 +1,10 @@
+maxlike_0.1-8
+
+o  Allow rasterStack objects for newdata (function predict.maxlikeFit)
+
+o  Avoid error warnings when all explanatory variables are available
+   from a newdata data.frame or rasterStack
+
 maxlike_0.1-7
 
 o  Allow maxlike to be calibrated with data.frames via arguments 

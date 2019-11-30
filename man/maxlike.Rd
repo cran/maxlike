@@ -196,7 +196,7 @@ points(carw.data$xy1, pch=16, cex=0.1)
 # We could do something similar by fixing the intercept at logit(0.5)=0.
 # However, it seems more appropriate to estimate this parameter.
 
-fm.fix <- update(fm, fixed=c(0, rep(NA,length(coef(fm))-1)))
+# fm.fix <- update(fm, fixed=c(0, rep(NA,length(coef(fm))-1)))
 
 # Predict data.frame
 presenceData <- as.data.frame(extract(rs, carw.data$xy1))
