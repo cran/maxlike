@@ -34,7 +34,7 @@ $ dim        : num [1:2] 130 246
   formatting \code{raster.data} as a \code{\link{raster}} object.
 }
 \source{
-  \url{http://www.pwrc.usgs.gov/bbs/RawData/Choose-Method.cfm}
+  \url{https://www.pwrc.usgs.gov/bbs/RawData/}
 }
 \references{
   Royle, J.A., R.B. Chandler, C. Yackulic and J.

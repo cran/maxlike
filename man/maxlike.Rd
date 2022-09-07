@@ -155,6 +155,8 @@
 
 \examples{
 
+\dontrun{
+
 # Carolina Wren data used in Royle et. al (2012)
 data(carw)
 
@@ -214,7 +216,7 @@ backgroundData <- as.data.frame(extract(rs, y=background))
 backgroundData <- backgroundData[complete.cases(backgroundData), ]
 fm2 <- maxlike(~pcMix + I(pcMix^2) + pcDec + I(pcDec^2)+ pcCon +
     I(pcCon^2) + pcGr + I(pcGr^2) +
-    Lat + I(Lat^2) + Lon + I(Lon^2), 
+    Lat + I(Lat^2) + Lon + I(Lon^2),
     rasters=NULL, points=NULL,
     x=presenceData, z=backgroundData,
     method="BFGS", removeDuplicates=TRUE, savedata=TRUE)
@@ -224,10 +226,6 @@ summary(fm2)
 fm2$rasters <- rs
 psi.hat2 <- predict(fm2)
 
-
-
-
-\dontrun{
 
 # Simulation example
 

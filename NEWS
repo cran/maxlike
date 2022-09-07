@@ -1,3 +1,10 @@
+maxlike_0.1-9
+
+o  Made necessary corrections when checking package before uploading
+
+o  Changed author email from previous CGIAR.org domain (as a new CIFOR-ICRAF domain
+  will be created)
+
 maxlike_0.1-8
 
 o  Allow rasterStack objects for newdata (function predict.maxlikeFit)
