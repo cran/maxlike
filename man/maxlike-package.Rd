@@ -26,16 +26,7 @@
   one has presence-absence data, which will always
   contain more information about a species' distribution.
   }
-\details{
-\tabular{ll}{
-Package: \tab maxlike\cr
-Type: \tab Package\cr
-Version: \tab 0.1-5\cr
-Date: \tab 2013-12-17\cr
-License: \tab GPL (>=3) \cr
-LazyLoad: \tab yes\cr
-}
-}
+
 \references{
   J. A. Royle, R. B. Chandler, C. Yackulic and J.
   D. Nichols. 2012. Likelihood analysis of species occurrence probability

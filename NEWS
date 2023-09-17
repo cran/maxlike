@@ -1,3 +1,7 @@
+maxlike_0.1-10
+
+o  Modified maxlike-package.Rd to remove unnecessary table with package details
+
 maxlike_0.1-9
 
 o  Made necessary corrections when checking package before uploading
@@ -14,13 +18,13 @@ o  Avoid error warnings when all explanatory variables are available
 
 maxlike_0.1-7
 
-o  Allow maxlike to be calibrated with data.frames via arguments 
+o  Allow maxlike to be calibrated with data.frames via arguments
    x (data.frame with environmental conditions at presence point
    locations) and z (data.frame with environmental conditions at
    background locations).
 
 o  New argument for function predict.maxlikeFit of newdata,
-   allowing predictions from data.frames and via raster::predict  
+   allowing predictions from data.frames and via raster::predict
 
 maxlike_0.1-6
 
