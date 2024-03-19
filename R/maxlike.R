@@ -17,12 +17,12 @@ maxlike <- function(formula, rasters, points, x=NULL, z=NULL,
         x <- as.data.frame(x)
         z <- as.data.frame(z)
         cd.names <- names(x)
-        if (identical(names(x), names(z)) == F) {stop("x and z should have same names")} 
+        if (identical(names(x), names(z)) == F) {stop("x and z should have same names")}
         X.mf <- model.frame(formula, x, na.action=na.action)
         X <- model.matrix(formula, X.mf)
         Z.mf <- model.frame(formula, z, na.action=na.action)
         Z <- model.matrix(formula, Z.mf)
-        pts.removed <- pix.removed <- points.retained <- NULL 
+        pts.removed <- pix.removed <- points.retained <- NULL
     }else{
         npts <- nrow(points)
         cd.class <- class(rasters)[1]
@@ -124,7 +124,11 @@ maxlike <- function(formula, rasters, points, x=NULL, z=NULL,
     par <- fm$par
     if(hessian) {
         vcTry <- try(solve(fm$hessian[not.fixed, not.fixed]))
-        if(identical(class(vcTry), "matrix")) {
+
+# Modified R. Kindt, March 2024
+#        if(identical(class(vcTry), "matrix")) {
+
+        if(inherits(vcTry, "matrix")) {
             vc <- matrix(0, length(par), length(par))
             vc[not.fixed, not.fixed] <- vcTry
             se <- sqrt(diag(vc))

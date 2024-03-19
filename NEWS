@@ -1,3 +1,7 @@
+maxlike_0.1-11
+
+o  Modified main function of maxlike() to calculate SE values again
+
 maxlike_0.1-10
 
 o  Modified maxlike-package.Rd to remove unnecessary table with package details
